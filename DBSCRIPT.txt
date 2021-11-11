@@ -1,0 +1,73 @@
+create table tbl_inventory(
+it_id serial primary key ,
+it_name text not null,
+it_quantity numeric(18,4) not null,
+it_price numeric(30,15) not null,
+it_description text,
+it_purchase_date date not null,
+it_created_on TIMESTAMP default now(),
+it_status int4 default 1
+);
+
+
+
+================================
+
+
+CREATE OR REPLACE FUNCTION "public"."fetch_inventory_grid"("itemid" int4)
+  RETURNS TABLE("t_it_id" int4, "t_it_name" text, "t_it_quantity" numeric, "t_it_price" numeric, "t_it_description" text, "t_it_purchase_date" text) AS $BODY$
+BEGIN
+IF coalesce(itemid,0)=0 THEN
+return query 
+select it_id,it_name,it_quantity,it_price,it_description,to_char(it_purchase_date,'dd-MON-yyyy') as purchasedate from tbl_inventory; 
+else 
+return query 
+select it_id,it_name,it_quantity,it_price,it_description,to_char(it_purchase_date,'dd/mm/yyyy') as purchasedate from tbl_inventory where it_id=itemid;
+
+end if;
+
+end;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100
+  ROWS 1000
+=======================================
+CREATE OR REPLACE FUNCTION "public"."sp_delete_inventory_details"(IN "t_it_id" int4, OUT "statusid" text)
+  RETURNS "pg_catalog"."text" AS $BODY$
+BEGIN
+DELETE  FROM tbl_inventory WHERE it_id =t_it_id;
+statusid:= 1;
+end;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+
+ALTER FUNCTION "public"."sp_delete_inventory_details"("t_it_id" int4, OUT "statusid" text) OWNER TO "postgres";
+
+========================================
+
+
+
+CREATE OR REPLACE FUNCTION "public"."sp_save_inventory_details"(IN "t_it_id" int4, IN "t_it_name" text, IN "t_it_quantity" numeric, IN "t_it_price" numeric, IN "t_it_description" text, IN "t_it_purchase_date" text, OUT "statusid" int4, OUT "status" text)
+  RETURNS "pg_catalog"."record" AS $BODY$
+BEGIN 
+
+IF coalesce(t_it_id,0)=0 THEN
+insert into tbl_inventory(it_name,it_quantity,it_price,it_description,it_purchase_date) values (t_it_name,t_it_quantity,t_it_price,t_it_description,to_date(t_it_purchase_date,'dd/mm/yyyy'));
+
+"statusid":=1;
+"status":=''||t_it_name||' Record Saved Succesfully...' ;
+
+else
+UPDATE tbl_inventory SET it_name=t_it_name,it_quantity=t_it_quantity,it_price=t_it_price,it_description=t_it_description,it_purchase_date=to_date(t_it_purchase_date,'dd/mm/yyyy');
+
+"statusid":=2;
+"status":=''||t_it_name||'Record Updated Succesfully...' ;
+end if;
+END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+
+ALTER FUNCTION "public"."sp_save_inventory_details"("t_it_id" int4, "t_it_name" text, "t_it_quantity" numeric, "t_it_price" numeric, "t_it_description" text, "t_it_purchase_date" text, OUT "statusid" int4, OUT "status" text) OWNER TO "postgres";
+

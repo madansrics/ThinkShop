@@ -1,0 +1,184 @@
+﻿@model TB.ShopBridge.Models.Inventory
+
+@{
+    ViewBag.Title = "InventoryDetails";
+}
+
+
+@using (Html.BeginForm())
+{
+
+    <div class="page-content">
+        <div class="page-header">
+            <h1>
+                Create Item<small></small>
+
+            </h1>
+            <br />
+        </div>
+        <div class="border">
+            <div class="container-fluid">
+                <fieldset class="scheduler-border">
+                    <legend class="scheduler-border">Inventory Details</legend>
+                    <div class="page-content">
+                        @Html.HiddenFor(m => m.ItemId, new { @class = "form-control", id = "txtItemId" })
+                        <div class="alert alert-danger" id="errorBlock" style="display: none">
+                            <label id="lblMessage"></label>
+                        </div>
+                        <div class="row">
+
+                            <div class="col-md-3">
+                                <label>Item Name<span class="mandatory" style="color: #FF0000;">*</span></label>
+                                @Html.TextBoxFor(m => m.ItemName, new { @class = "form-control", autocomplete = "off", id = "txtItemName", @maxlength = 50 })
+                            </div>
+                            <div class="col-md-1"></div>
+                            <div class="col-md-3">
+                                <label>Quantity<span class="mandatory" style="color: #FF0000;">*</span></label>
+                                @Html.TextBoxFor(m => m.Itemquantity, new { @class = "form-control", autocomplete = "off", id = "txtItemQty", @maxlength = 3, @oncopy = "return false", @onpaste = "return false", @onchange = "TotalItemAmount()" })
+                            </div>
+                            <div class="col-md-1"></div>
+                            <div class="col-md-3">
+                                <label>Item Price<span class="mandatory" style="color: #FF0000;">*</span></label>
+                                @Html.TextBoxFor(m => m.Itemprice, new { @class = "form-control", autocomplete = "off", id = "txtItemPrice", @maxlength = 6, @onchange = "TotalItemAmount()" })
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label>Total Amount</label>
+                                @Html.TextBoxFor(m => m.TotalAmount, new { id = "txtItemTotalAmount", autocomplete = "off", @class = "form-control", @readonly = true })
+                            </div>
+                            <div class="col-md-1"></div>
+
+                            <div class="col-md-3">
+                                <label for="Employment Status">Purchase Date<span class="required" style="color: #FF0000;">*</span>  </label>
+
+                                @Html.TextBoxFor(m => m.ItemPurchaseDate, new { @class = "form-control", autocomplete = "off", id = "txtItemPurchaseDate", @readonly = true, @placeholder = "DD-MM-YYYY" })
+                            </div>
+                            <div class="col-md-1"></div>
+
+                            <div class="col-md-3">
+                                <label for="Subject">Description</label>
+                                @Html.TextAreaFor(m => m.ItemDescription, new { id = "txtItemDescription", autocomplete = "off", @class = "form-control", style = "resize:none", @maxsize = 500 })
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 34px" class="text-center footer">
+                            <input id="btnSave" type="submit" class="btn btn-success" name="btnSave" value='@Model.Button' />
+                            <input id="btnReset" type="button" value="Reset" class="btn btn-danger" name="btnReset">
+                            <input id="btnBack" type="button" value="Back" class="btn btn-info" name="btnBack">
+
+                        </div>
+                        <br />
+
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+    </div>
+
+}
+<link rel="stylesheet" href="//code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css">
+<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+<script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
+
+@if (Model.Status > 0)
+{
+    <script type="text/javascript">
+        alert('@Model.Message');
+        window.location.href = "../Inventory/InventoryView";
+
+    </script>
+}
+else if (Model.Status < 0)
+{
+    <script type="text/javascript">
+        alert('@Model.Message');
+        window.location.href = "../Inventory/InventoryDetails";
+    </script>
+}
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('#txtItemPurchaseDate').datepicker({
+            endDate: "today",
+            autoclose: true,
+            dateFormat: "dd-mm-yy",
+        });
+
+
+    });
+
+    $("#btnBack").click(function (e) {
+        window.location.href = "../Inventory/InventoryView";
+    });
+
+    $("#btnReset").click(function (e) {
+        window.location.href = "../Inventory/InventoryDetails";
+    });
+
+    $("#btnSave").click(function (e) {
+        debugger;
+
+        var ItemName = $('#txtItemName').val();
+        var Itemqty = $('#txtItemQty').val();
+        var ItemPrice = $('#txtItemPrice').val();
+        var ItemPurchaseDate = $('#txtItemPurchaseDate').val();
+        if (ItemName.trim() == "") {
+
+            alert("Please Enter Valid Item Name");
+            $("#txtItemName").focus();
+            return false;
+        } else if (Itemqty.trim() == "") {
+
+            alert("Please Enter Quantity Of Item");
+            $("#txtItemQty").focus();
+            return false;
+        } else if (ItemPrice.trim() == "") {
+
+            alert("Please Enter Item Price");
+            $("#txtItemPrice").focus();
+            return false;
+        } else if (ItemPurchaseDate.trim() == "") {
+
+            alert("Please Select Purchase Date");
+            $("#txtItemPurchaseDate").focus();
+            return false;
+        }
+        TotalItemAmount();
+    });
+
+
+    $('#txtItemQty').keypress(function (event) {
+        debugger;
+        if (((event.which != 46 || (event.which == 46 && $(this).val() == ''))) && (event.which < 48 || event.which > 57)) {
+            event.preventDefault();
+        }
+    }).on('paste', function (event) {
+        event.preventDefault();
+    });
+
+
+    $('#txtItemPrice').keypress(function (event) {
+        debugger;
+        if (((event.which != 46 || (event.which == 46 && $(this).val() == '')) ||
+                $(this).val().indexOf('.') != -1) && (event.which < 48 || event.which > 57)) {
+            event.preventDefault();
+        }
+    }).on('paste', function (event) {
+        event.preventDefault();
+    });
+
+
+    function TotalItemAmount() {
+        debugger;
+        var Itemqty = $('#txtItemQty').val();
+        var ItemPrice = $('#txtItemPrice').val();
+        if (Itemqty.trim() != "" && parseInt(Itemqty) > 0 && ItemPrice.trim() != "" && parseFloat(ItemPrice) > 0) {
+            $('#txtItemTotalAmount').val((parseInt(Itemqty).toFixed(4) * (parseFloat(ItemPrice).toFixed(2))));
+        }
+    }
+
+</script>
+
+

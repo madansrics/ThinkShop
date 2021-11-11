@@ -1,0 +1,114 @@
+﻿@model TB.ShopBridge.Models.Inventory
+
+@{
+    ViewBag.Title = "InventoryView";
+}
+
+
+<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+<script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
+
+@*<script src="//cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css"></script>*@
+<script src="//cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+<script src="https://use.fontawesome.com/releases/v5.15.4/js/all.js" data-auto-replace-svg="nest"></script>
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#btnnew").click(function (e) {
+            window.location.href = "../Inventory/InventoryDetails";
+        });
+
+
+        $('#grdinventoryView').DataTable({
+            "bPaginate": false,
+            "bLengthChange": false,
+            "bFilter": true,
+            "bInfo": false,
+            "bAutoWidth": false,
+            "ajax": {
+                "url": "/Inventory/GetSavedDetails",
+                "type": "GET",
+                "datatype": "json",
+            },
+            "columns": [
+                { "data": "ItemName", "autoWidth": true },
+                 { "data": "ItemDescription", "autoWidth": true },
+                 { "data": "ItemPurchaseDate", "autoWidth": true },
+                 { "data": "Itemquantity", "autoWidth": true },
+                 { "data": "Itemprice", "autoWidth": true },
+                 { "data": "TotalAmount", "autoWidth": true },
+
+                    {
+                        "data": "ItemId", "autoWidth": true, "sortable": false, "render": function (data, type, row) {
+                            return '<a style="color:red;" href="javascript:editItem(\'' + row.ItemId + '\')"  class="far fa-edit" title="Edit"></a>' + '' + '<a style="color:red;" href="javascript:removeitem(\'' + row.ItemId + '\')"  class="fas fa-trash-alt" title="Delete"></a>';
+                        }
+                    },
+
+            ],
+            responsive: true
+        });
+        
+    });
+
+    function editItem(data) {
+        debugger;
+        var url = '@Url.Action("ItemEdit", "Inventory")';
+        $.post(url, {
+            itid: data,
+        },
+             function () {
+                 window.location.href = "../Inventory/InventoryDetails";
+             });
+    }
+    function removeitem(data) {
+        debugger;
+        var url = '@Url.Action("RemoveItem", "Inventory")';
+        $.post(url, {
+            itid: data,
+        },
+             function () {
+                 alert("Inventory Item Removed Successfully.");
+                 window.location.href = "../Inventory/InventoryView";
+
+             });
+    }
+    
+</script>
+
+<section id="content" class="seipkon-content-wrapper active">
+
+    <div class="page-content">
+        <div class="page-header">
+            <h1>
+                Inventory View Details <small></small>
+
+            </h1>
+            <br />
+            <input id="btnnew" type="button" class="btn btn-success pull-right" name="New" value="Request" style="float: right" />
+        </div>
+        <br />
+        <div style="margin-top: 5px"></div>
+        <div class="col-md-12">
+            <table id="grdinventoryView" class="table display table-bordered">
+                <thead>
+                    <tr>
+                        <th style="text-align: center" colspan="7">Item</th>
+                    </tr>
+                    <tr style="text-align: center;">
+                        <th style="text-align: center">Name</th>
+                        <th style="text-align: center">Description</th>
+                        <th style="text-align: center">Purchase Date</th>
+                        <th style="text-align: center">Quantity</th>
+                        <th style="text-align: center">Price</th>
+                        <th style="text-align: center">Total Amount</th>                  
+                        <th style="text-align: center">Action</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</section>
+
